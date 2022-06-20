@@ -1,11 +1,6 @@
 /*
 엘리베이터 3대인 version.
 elev에 담을 속성: 호수, 방향, 현재 층, 방문 리스트
-1. 단일 유닛 움직임부터 구현
-- priority_queue 붙이는 법 강구
-- GUI 개선 필요
-2. 방문 리스트 붙이기
-?- runElevator(['elev1',1,3,[[2,4],[4,5],[6,7]],[[5,4],[5,1]],2],['elev2',1,4,[[2,4],[4,5]],[[7,6],[5,1]],3],['elev3',0,6,[[7,6],[5,1]],[],3]).
 ?-runElevator([1,1,3,[4,5,6,7,5,4,1,3]],[2,1,4,[5,7,6,5,1,2,4]],[3,0,6,[7,6,5,1]]).
 엘리베이터가 윗방향이면 1, 아랫방향이면 0.
 */
@@ -31,22 +26,22 @@ elev([Name,Direction,Now,List],[X1,X2,X3,X4]):-
     X1 is Name, print('elev'),print(X1),
     (empty_queue(List)->printElevS(Now),print('pause'),nl,X2 is Direction, X3 is Now, clone(List,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E, List, _),Now-E < 0)->
+    ((not(empty_queue(List)),dequeue(E, List, _),!,Now-E < 0)->
     X3 is Now+1,printElevU(Now),nl,X2 is 1, clone(List,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E, List, _),Now-E > 0)->
+    ((not(empty_queue(List)),dequeue(E, List, _),!,Now-E > 0)->
     X3 is Now-1,printElevD(Now),nl,X2 is 0,clone(List,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E1, List, T1),print(T1),Now-E1 =:= 0,empty_queue(T1))->
+    ((not(empty_queue(List)),dequeue(E1, List, T1),!,Now-E1 =:= 0,empty_queue(T1))->
     printElevS(Now),print('open'),nl,X2 is Direction,X3 is Now,clone(T1,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E2, List, T2),Now-E2 =:= 0,dequeue(E3, T2, _), E2<E3)->
+    ((not(empty_queue(List)),dequeue(E2, List, T2),!,Now-E2 =:= 0,dequeue(E3, T2, _),!,E2<E3)->
     X3 is Now+1,printElevU(Now),print('open'),nl,X2 is 1,clone(T2,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E4, List, T3),Now-E4 =:= 0,dequeue(E5, T3, _), E4>E5)->
-    X3 is Now-1,printElevD(Now),print('open'),nl,X2 is 0,clone(T3,X4);!),
+    ((not(empty_queue(List)),dequeue(E4, List, T3),!,Now-E4 =:= 0,dequeue(E5, T3, _),!,E4>E5)->
+    X3 is Now-1,printElevD(Now),print('open'),nl,X2 is 0,clone(T3,X4);!).
     
-    print([X1,X2,X3,X4]),nl.
+    %print([X1,X2,X3,X4]),nl.
 
 runElevator([A1,A2,A3,A4],[B1,B2,B3,B4],[C1,C2,C3,C4]):-
     print('floor: 1 2 3 4 5 6 7 8 9'),nl,
