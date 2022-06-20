@@ -6,47 +6,58 @@ elev에 담을 속성: 호수, 방향, 현재 층, 방문 리스트
 - GUI 개선 필요
 2. 방문 리스트 붙이기
 ?- runElevator(['elev1',1,3,[[2,4],[4,5],[6,7]],[[5,4],[5,1]],2],['elev2',1,4,[[2,4],[4,5]],[[7,6],[5,1]],3],['elev3',0,6,[[7,6],[5,1]],[],3]).
+?-runElevator(['elev1',1,3,[4,5,6,7,5,4,1,3]],['elev2',1,4,[5,7,6,5,1,2,4]],['elev3',0,6,[7,6,5,1]]).
 엘리베이터가 윗방향이면 1, 아랫방향이면 0.
 */
 
-elev([Name,Direction,Now,Uplist,Downlist, Distance],[X1,X2,X3,X4,X5,X6]):-
-    X1 is Name, print(X1),
-    
-    (Direction =:= 1,not(empty_queue(Uplist))-> 
-    printElevU(Now),print('pause'),X2 is Direction,X3 is Now,X4 is Uplist,X5 is Downlist,X6 is Distance;!),
-    
-    (Direction =:= 1 -> printElevU(Now);printElevD(Now)),
-    %%% 여기서 우선순위 큐로 순서 재지정해줘야 함
-    (A6 =:= 0 -> AA3 is A3, print(' $open$'),
-        (A2 =:= 1-> AA2 is 0; AA2 is 1);!),nl,
-    %%% 큐에서 팝해야 함, 일단은 제일 높은 곳에 멈췄다는 가정
-    (A6 > 0 -> AA2 is A2,
-        (A2 =:= 1-> AA3 is A3+1; AA3 is A3-1);!),
-    (A2 =:= 1 -> AA6 is A4-A3-1; AA6 is A3-A5-1),
-    
-    (empty_queue(Uplist),empty_queue(Downlist) -> 
-    printElevU(Now),print('pause'),X2 is Direction,X3 is Now,X4 is Uplist,X5 is Downlist,X6 is Distance;!),
-    (Direction =:= 1,empty_queue(Uplist),not(empty_queue(Downlist)) -> 
-    printElevD(Now-1),X2 is 0,insert_list_pqD(Downlist,[],PQ),dequeue(H,PQ,_),
-        X3 is Now-1,X4 is Uplist,X5 is PQ,X6 is Now-H;!),
-    (Direction =:= 0,not(empty_queue(Uplist)),empty_queue(Uplist) -> 
-    printElevU(Now+1),X2 is 0,insert_list_pqD(Downlist,[],PQ),dequeue(H,PQ,_),
-        X3 is Now-1,X4 is Uplist,X5 is PQ,X6 is Now-H;!),
-    (Direction =:= 0,not(empty_queue(Uplist)),empty_queue(Downlist) -> 
-    printElevU(Now),X2 is 1,X3 is Now,X4 is Uplist,X5 is Downlist,X6 is Distance;!),
-    
-    print([X1,X2,X3,X4,X5,X6]),nl.
+clone([],[]).
+clone([H|T],[H|Z]):- clone(T,Z).
 
-runElevator([A1,A2,A3,A4,A5,A6],[B1,B2,B3,B4,B5,B6],[C1,C2,C3,C4,C5,C6]):-
+nmin_list([[H1|_]|T], Min) :-
+    nmin_list(T, H1, Min).
+nmin_list([], Min, Min).
+nmin_list([[H1|_]|T], Min0, Min) :-
+    Min1 is min(H1, Min0),
+    nmin_list(T, Min1, Min).
+
+nmax_list([[H1|_]|T], Max) :-
+    nmax_list(T, H1, Max).
+nmax_list([], Max, Max).
+nmax_list([[H1|_]|T], Max0, Max) :-
+    Max1 is max(H1, Max0),
+    nmax_list(T, Max1, Max).
+
+elev([Name,Direction,Now,List],[X1,X2,X3,X4]):-
+    X1 is Name, print('elev'),print(X1),
+    (empty_queue(List)->printElevS(Now),print('pause'),nl,X2 is Direction, X3 is Now, clone(List,X4);!),
+    
+    ((not(empty_queue(List)),dequeue(E, List, T),Now-E > 0)->
+    X3 is Now+1,printElevU(Now),nl,X2 is 1, clone(T,X4);!),
+    
+    ((not(empty_queue(List)),dequeue(E, List, T),Now-E < 0)->
+    X3 is Now-1,printElevD(Now),nl,X2 is 0,clone(T,X4);!),
+    
+    ((not(empty_queue(List)),dequeue(E, List, T),Now-E =:= 0,empty_queue(T))->
+    printElevS(Now),print('open'),X2 is Direction,X3 is Now,clone(T,X4);!),
+    
+    ((not(empty_queue(List)),dequeue(E, List, T),Now-E =:= 0,dequeue(E2, T, T2), E>E2)->
+    X3 is Now+1,printElevU(Now),print('open'),nl,X2 is 1,clone(T,X4);!),
+    
+    ((not(empty_queue(List)),dequeue(E, List, T),Now-E =:= 0,dequeue(E2, T, T2), E<E2)->
+    X3 is Now-1,printElevD(Now),print('open'),nl,X2 is 0,clone(T,X4);!),
+    
+    print([X1,X2,X3,X4]),nl.
+
+runElevator([A1,A2,A3,A4],[B1,B2,B3,B4],[C1,C2,C3,C4]):-
     print('floor: 1 2 3 4 5 6 7 8 9'),nl,
     
-    elev([A1,A2,A3,A4,A5,A6],[NA1,NA2,NA3,NA4,NA5,NA6]),
-    elev([B1,B2,B3,B4,B5,B6],[NB1,NB2,NB3,NB4,NB5,NB6]),
-    elev([C1,C2,C3,C4,C5,C6],[NC1,NC2,NC3,NC4,NC5,NC6]),
+    elev([A1,A2,A3,A4],[NA1,NA2,NA3,NA4]),
+    elev([B1,B2,B3,B4],[NB1,NB2,NB3,NB4]),
+    elev([C1,C2,C3,C4],[NC1,NC2,NC3,NC4]),
     
     %무한루프 방지용
     write('Shall I continue? Type y or n: '),read(X), continue_or_not(X),
-    runElevator([NA1,NA2,NA3,NA4,NA5,NA6],[NB1,NB2,NB3,NB4,NB5,NB6],[NC1,NC2,NC3,NC4,NC5,NC6]).
+    runElevator([NA1,NA2,NA3,NA4],[NB1,NB2,NB3,NB4],[NC1,NC2,NC3,NC4]).
 
 continue_or_not(y).
 
@@ -70,7 +81,16 @@ printElevU(6):-print(' 0 0 0 0 0 > 0 0 0').
 printElevU(7):-print(' 0 0 0 0 0 0 > 0 0').
 printElevU(8):-print(' 0 0 0 0 0 0 0 > 0').
 printElevU(9):-print(' 0 0 0 0 0 0 0 0 >').
-
+    
+printElevS(1):-print(' x 0 0 0 0 0 0 0 0').
+printElevS(2):-print(' 0 x 0 0 0 0 0 0 0').
+printElevS(3):-print(' 0 0 x 0 0 0 0 0 0').
+printElevS(4):-print(' 0 0 0 x 0 0 0 0 0').
+printElevS(5):-print(' 0 0 0 0 x 0 0 0 0').
+printElevS(6):-print(' 0 0 0 0 0 x 0 0 0').
+printElevS(7):-print(' 0 0 0 0 0 0 x 0 0').
+printElevS(8):-print(' 0 0 0 0 0 0 0 x 0').
+printElevS(9):-print(' 0 0 0 0 0 0 0 0 x').
 %%%
 empty_queue([]).
 enqueue(E, [], [E]).
