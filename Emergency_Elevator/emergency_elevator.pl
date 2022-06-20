@@ -31,20 +31,20 @@ elev([Name,Direction,Now,List],[X1,X2,X3,X4]):-
     X1 is Name, print('elev'),print(X1),
     (empty_queue(List)->printElevS(Now),print('pause'),nl,X2 is Direction, X3 is Now, clone(List,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E, List, T),Now-E > 0)->
-    X3 is Now+1,printElevU(Now),nl,X2 is 1, clone(T,X4);!),
+    ((not(empty_queue(List)),dequeue(E, List, _),Now-E < 0)->
+    X3 is Now+1,printElevU(Now),nl,X2 is 1, clone(List,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E, List, T),Now-E < 0)->
-    X3 is Now-1,printElevD(Now),nl,X2 is 0,clone(T,X4);!),
+    ((not(empty_queue(List)),dequeue(E, List, _),Now-E > 0)->
+    X3 is Now-1,printElevD(Now),nl,X2 is 0,clone(List,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E, List, T),Now-E =:= 0,empty_queue(T))->
-    printElevS(Now),print('open'),X2 is Direction,X3 is Now,clone(T,X4);!),
+    ((not(empty_queue(List)),dequeue(E1, List, T1),print(T1),Now-E1 =:= 0,empty_queue(T1))->
+    printElevS(Now),print('open'),nl,X2 is Direction,X3 is Now,clone(T1,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E, List, T),Now-E =:= 0,dequeue(E2, T, T2), E>E2)->
-    X3 is Now+1,printElevU(Now),print('open'),nl,X2 is 1,clone(T,X4);!),
+    ((not(empty_queue(List)),dequeue(E2, List, T2),Now-E2 =:= 0,dequeue(E3, T2, _), E2<E3)->
+    X3 is Now+1,printElevU(Now),print('open'),nl,X2 is 1,clone(T2,X4);!),
     
-    ((not(empty_queue(List)),dequeue(E, List, T),Now-E =:= 0,dequeue(E2, T, T2), E<E2)->
-    X3 is Now-1,printElevD(Now),print('open'),nl,X2 is 0,clone(T,X4);!),
+    ((not(empty_queue(List)),dequeue(E4, List, T3),Now-E4 =:= 0,dequeue(E5, T3, _), E4>E5)->
+    X3 is Now-1,printElevD(Now),print('open'),nl,X2 is 0,clone(T3,X4);!),
     
     print([X1,X2,X3,X4]),nl.
 
