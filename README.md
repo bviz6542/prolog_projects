@@ -1,6 +1,11 @@
-# Prolog_Practice
+# prolog_projects
 
-## 응급 엘리베이터 with prolog
-의의: 일반 엘리베이터의 한계를 극복, 응급 상황에서 비상 수송 프로토콜이 발동되는 엘리베이터.
-1. 실시간 GUI 구현
-2. 이어서 작성
+## Real Time Elevator (with prolog)
+- school project on 'Intelligent Informatic System' lecture
+- you can test my code at https://swish.swi-prolog.org/
+- I tried to implement 'real time elevator' in code, which is able to take real time calls from waiting users.
+- query example: ?-runElevator([1,1,3,[4,5,6,7,5,4,1,3]],[2,1,4,[5,7,6,5,1,2,4]],[3,0,6,[7,6,5,1]])
+- runElevator([elevator name, up or dowm, current floor, visiting lists], same, same)
+
+- main ADTs I used: set, priority queue
+- this code supports GUI. you can watch the elevators moving in real time.
